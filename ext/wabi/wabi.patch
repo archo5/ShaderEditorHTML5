@@ -1,0 +1,21 @@
+--- wabi.unpooled.js	pr jûn  4 23:50:34 2018
++++ wabi.unpooled.edit.js	ot jûn  5 08:04:01 2018
+@@ -535,12 +535,16 @@
+ 	};
+ 	const updateRender = function() {
+ 		updateBuffer.sort(sortByDepth);
+-		for(let n = 0; n < updateBuffer.length; n++) {
+-			const node = updateBuffer[n];
++		while (updateBuffer.length)
++		{
++			const node = updateBuffer.shift()
+ 			if(!node.dirty) {
+ 				continue;
+ 			}
++			const size = updateBuffer.length
+ 			renderInstance(node);
++			if (updateBuffer.length > size)
++				updateBuffer.sort(sortByDepth)
+ 		}
+ 		updateBuffer.length = 0;
+ 		needUpdate = false;

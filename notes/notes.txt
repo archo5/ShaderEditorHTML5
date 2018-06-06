@@ -1,0 +1,44 @@
+: : : : :features: : : : :
+[LOW] all/any/not() support
+[LOW] texture sampling func support (*bias, *proj??, cube*)
+[LOW] infinite args for add/mul
+[MED] auto dependent node location adjustment
+
+: : : : :bugs: : : : :
+
+: : : : :improvements: : : : :
+- preserve undo stack when adding nodes to expr (how?)
+- [expr] add editors as type constructors to preserve editing capabilities 
+
+: : : : :UI design: : : : :
+> when pin has no links
+	- node pin contains + icon
+> when pin has a link
+	- node pin contains some kind of editing icon
+- clicking on pin asks you what you want it to be. it can be:
+	- numbers/constant value (clicking unlinks link if any, opens editor menu) --------- RIGHT ?
+	- existing node (clicking goes into node selection mode) --------- TO THE LEFT
+	- new node (clicking opens the add menu) \__             --------- LEFT LOWER
+	- variable (clicking opens the add menu) /  ^ possibly joined into one?              -------- TOP LEFT
+	- function (clicking opens a window where expression to be evaluated can be entered) -------- TOP RIGHT
+	!> the buttons are laid out in a grid
+
+> expression editor replaces top bar
+	- the small menu is too short to contain even a single texture2D call
+	- top bar will allow unlocking of the node editor for casual clicks
+	? where to put the "clean up" checkbox?
+
+: : : : :blind spots: : : : :
+~~~ these are the things that still need some serious thought ~~~
+> how dimension fitting works
+- downdimming via swizzle (that way full selection is possible)
+- updimming applies swizzle after [0,0,0,1] padding (padding is necessary in the general case like 3->4 so it comes for free with the swizzle as well)
+
+> expression generation
+- should ref-stop at nodes referenced by at least one other node (2+ refs, otherwise could cause repeated computation)
+
+
+// cool shader 1
+vec4 t_2 = texture2D(fractalGrayscale, vTexCoord0);
+vec4 t_3 = smoothstep((t_2.xyzz), (vec4(vTexCoord0,0,1).xyyw), (vec4(0.5,0.477,0.5,1)));
+gl_FragColor = t_3;

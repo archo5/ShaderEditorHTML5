@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>ShaderEdit</title>
+		<link rel="stylesheet" type="text/css" href="ext/fa/css/fa-solid.css" />
+		<link rel="stylesheet" type="text/css" href="ext/fa/css/fontawesome.css" />
+		<link rel="stylesheet" type="text/css" href="shaderedit.css" />
+		<!--<script type="text/javascript" src="http://meta2d.com/libs/wabi.dev.min.js"></script><!---->
+		<!--<script type="text/javascript" src="ext/wabi/wabi.dev.min.js"></script><!---->
+		<!--<script type="text/javascript" src="ext/wabi/wabi.unpooled.dev.js"></script><!---->
+		<!--<script type="text/javascript" src="ext/wabi/wabi.unpooled.js"></script><!---->
+		<script type="text/javascript" src="ext/wabi/wabi.unpooled.edit.js"></script><!---->
+		<!--<script type="text/javascript" src="ext/wabi/wabi.min.js"></script><!---->
+		<script type="text/javascript">
+const { component, componentVoid, elementOpen, elementClose, elementVoid, text, route, store, update } = wabi
+const cvoid = componentVoid
+const eopen = elementOpen
+const eclose = elementClose
+const evoid = elementVoid
+//store.update = function(k){ store.set(k, store.get(k)) }
+		</script>
+		<script type="text/javascript" src="ext/noisejs/perlin.js"></script>
+		<script type="text/javascript" src="ExpressionParser.js"></script>
+		<script type="text/javascript" src="NodeGraph.js"></script>
+		<script type="text/javascript" src="Shaders.js"></script>
+		<script type="text/javascript" src="RenderUtils.js"></script>
+		<script type="text/javascript" src="Rendering.js"></script>
+		<script type="text/javascript" src="UIControls.js"></script>
+		<script type="text/javascript" src="NodeUI.js"></script>
+		<script type="text/javascript" src="NodePinUI.js"></script>
+		<script type="text/javascript" src="EditorDragDrop.js"></script>
+		<script type="text/javascript" src="Editor.js"></script>
+		<script type="text/javascript" src="Definitions.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+editorInit();
+
+funcCreate("red", 3, [])
+funcSetCur("red")
+var node_output_red = nodeMap[funcGetCurData().outputNode]
+nodeArgSetValue(node_output_red, 0, [0.8, 0.2, 0, 1.0])
+
+funcCreate("passthru4", 4, [{ dims: 4, name: "input" }])
+funcSetCur("passthru4")
+var node_output_passthru4 = nodeMap[funcGetCurData().outputNode]
+nodeSetArgVariable(node_output_passthru4, 0, "input")
+
+funcSetCur("main")
+
+var node_output = nodeMap[funcGetCurData().outputNode]
+
+switch (1)
+{
+case 0:
+	var node_tex2D = nodeConstruct("tex2D")
+	var node_h2n = nodeConstruct("math")
+	var node_pbr = nodeConstruct("func")
+
+	node_pbr.rsrc = "PBR_Metallic"
+	node_h2n.rsrc = "height2normal"
+	//nodeSetArgSwizzle(node_h2n, 0, "xyww") -- TODO fix expression
+	node_tex2D.rsrc = "perlinGrayscale4"
+	node_tex2D.showPreview = true
+
+	nodeArgSetLink(node_output, 0, node_pbr)
+	nodeArgSetValue(node_pbr, 0, [0.25, 0.7, 0.9])
+	nodeArgSetLink(node_pbr, 1, node_h2n)
+	nodeArgSetValue(node_pbr, 2, [0])
+	nodeArgSetValue(node_pbr, 3, [0.05])
+	nodeArgSetLink(node_h2n, 0, node_tex2D)
+	nodeSetArgVariable(node_tex2D, 0, "vTexCoord0")
+
+	nodeColsInsertCol(1, [node_pbr])
+	nodeColsInsertCol(2, [node_h2n])
+	nodeColsInsertCol(3, [node_tex2D])
+	break
+case 1:
+	var node_texBC = nodeConstruct("tex2D")
+	var node_texN = nodeConstruct("tex2D")
+	var node_texM = nodeConstruct("tex2D")
+	var node_texR = nodeConstruct("tex2D")
+	var node_pbr = nodeConstruct("func")
+	var node_unpacknrm = nodeConstruct("math")
+
+	node_pbr.rsrc = "PBR_Metallic"
+	node_unpacknrm.rsrc = "unpacknormal"
+	node_texBC.rsrc = "wall1BaseColor"
+	node_texN.rsrc = "wall1Normal"
+	node_texM.rsrc = "wall1Metallic"
+	node_texR.rsrc = "wall1Roughness"
+
+	nodeSetArgVariable(node_texBC, 0, "vTexCoord0")
+	nodeSetArgVariable(node_texN, 0, "vTexCoord0")
+	nodeSetArgVariable(node_texM, 0, "vTexCoord0")
+	nodeSetArgVariable(node_texR, 0, "vTexCoord0")
+
+	nodeArgSetLink(node_output, 0, node_pbr)
+
+	nodeArgSetLink(node_pbr, 0, node_texBC)
+	nodeArgSetLink(node_pbr, 1, node_unpacknrm)
+	nodeArgSetLink(node_pbr, 2, node_texM)
+	nodeArgSetLink(node_pbr, 3, node_texR)
+
+	nodeArgSetLink(node_unpacknrm, 0, node_texN)
+
+	nodeColsInsertCol(1, [node_pbr])
+	nodeColsInsertCol(2, [node_texBC, node_unpacknrm, node_texM])
+	nodeColsInsertCol(3, [node_texN, node_texR])
+	break
+}
+
+//console.log(nodesGenerateShader(node_output))
+
+		</script>
+	</body>
+</html>
